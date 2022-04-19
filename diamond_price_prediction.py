@@ -21,10 +21,12 @@ import tensorflow as tf
 diamonds = pd.read_csv("/content/sample_data/diamonds.csv")
 
 # print the first 5 rows of the data content
-diamonds.head()
+print(diamonds.head())
 
 # Check all the columns and index of the dataset
-diamonds.info()
+print(diamonds.info())
+
+print(diamonds['price'].describe())
 
 # In this case study, price should be the label as we are trying to predict the price of the diamonds based on the features given in the dataset
 # We need to inspect and pre-process the data first
@@ -86,8 +88,12 @@ print(X_test[5:,5])
 # Now that data preprocessing is done, we can proceed with building the model
 # We are going to use functional API model from tensorflow to build a model for training
 inputs = tf.keras.Input(shape = X_train.shape[1])
-dense = tf.keras.layers.Dense(64, activation='relu')
+dense = tf.keras.layers.Dense(128, activation='relu')
 x = dense(inputs)
+dense = tf.keras.layers.Dense(72, activation='relu')
+x = dense(x)
+dense = tf.keras.layers.Dense(64, activation='relu')
+x = dense(x)
 dense = tf.keras.layers.Dense(32, activation='relu')
 x = dense(x)
 dense = tf.keras.layers.Dense(16, activation='relu')
@@ -114,7 +120,7 @@ from gc import callbacks
 import datetime, os
 logdir = os.path.join("logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 tensorboard_callback = tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1)
-es_callback = tf.keras.callbacks.EarlyStopping(monitor = 'loss', patience = 3)
+es_callback = tf.keras.callbacks.EarlyStopping(monitor = 'loss', patience = 5, verbose=1)
 
 # train the model
 BATCH_SIZE = 50
@@ -130,9 +136,6 @@ history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_si
 
 # Evaluate the model
 model.evaluate(X_test, y_test, verbose=2)
-
-# make prediction with the trained model
-print(model.predict(np.expand_dims(X_test[100], axis=0)))
 
 #visualize the error graph
 import matplotlib.pyplot as plt
@@ -152,7 +155,7 @@ plt.show()
 
 print("\n")
 
-#plot the graph of training accuracy vs validation loss
+#plot the graph of training accuracy vs validation accuracy
 training_accuracy = history.history['mae']
 val_accuracy = history.history['val_mae']
 epoch = history.epoch
